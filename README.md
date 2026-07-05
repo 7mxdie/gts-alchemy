@@ -106,4 +106,4 @@ in a Web Worker so the UI stays responsive.
 - Rarity / "farmable" tags are best-effort.
 - GTS "dynamic" crafting (enhanced stats / impurities) is not modelled.
 
-- Made for the GTS community, *Vel'dun*.
+- Made for the GTS community.
