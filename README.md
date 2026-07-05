@@ -79,16 +79,14 @@ different "Night Eye" effects) never wrongly combine.
 
 For each potion, every effect shared by two or more reagents is kept; for a shared
 effect the strongest reagent instance wins. The primary (naming) effect is the
-highest-potency one and decides potion vs poison. There are two modes:
+highest-potency one and decides potion vs poison.
 
-- **Base Potency** (default) — each effect scored straight from its exported
-  strength, `baseCost x (mag x dur/10)^1.1`, summed. No skill, perks or gear. This
-  is config-independent and the reliable ranking.
-- **Player Estimate** (experimental) — layers on Alchemy skill, the Alchemist perk
-  and Fortify Alchemy gear via a data-driven `SCALING` config in `index.html`. GTS
-  reworks the perk tree and Fortify Alchemy, so this is a vanilla-style *fallback*
-  until real GTS/Adamant numbers are dropped into `SCALING` (no worker changes
-  needed). Numbers are estimates, not exact merchant prices.
+Each effect is scored straight from its exported strength — `baseCost x (mag x
+dur/10)^1.1`, summed — with no player scaling. This **Potency** value is
+config-independent, so the ranking is identical for every character. It is a
+ranking of inherent strength, not the potion's exact in-game magnitude or gold
+value (those depend on the player's Alchemy skill, perks, Fortify Alchemy gear and
+traits — the in-game alchemy table shows the exact numbers).
 
 Client-side processing drops non-craftable items (24-hour "eaten" food buffs and
 test/debug records) and tags each ingredient Vanilla / CC-AE / Mod for filtering.
@@ -101,25 +99,14 @@ Instead the worker caps the search to the top ~180 ingredients by best-effect va
 combinations, and keeps a bounded top-N without sorting the whole space. It all runs
 in a Web Worker so the UI stays responsive.
 
-## Known calculation caveats
+## Notes
 
-- **Base Potency is the dependable ranking.** Everything below only affects the
-  experimental **Player Estimate** mode.
-- **GTS perk scaling is not fully modelled yet** — Player Estimate uses a
-  vanilla-style fallback pending Adamant's alchemy-tree numbers, which slot into
-  the `SCALING` config.
-- **Fortify Alchemy behaviour under GTS is not fully modelled** (flat-percentage
-  fallback for now).
-- **Dynamic enhanced / impure potion crafting is not modelled at all.**
-- **Gold is a relative potency ranking**, not an exact sale price — GTS applies a
-  global value reduction that may live in a game setting rather than the records.
+- **Potency is a ranking, not a price.** Actual in-game magnitude, duration and gold
+  value vary with the player's build and GTS's evolving mechanics.
 - Rarity / "farmable" tags are best-effort; the base **GTS** tab is derived by
   hiding AE/CC content until a dedicated base-GTS export is dropped in.
-
-To make Player Estimate exact, `ExportGTSAlchemy.pas` has a documented **v4 plan**
-(see the comment block at the end of the script) for dumping the Alchemist /
-Physician / Benefactor / Poisoner and Adamant/GTS alchemy perks, the Fortify
-Alchemy magic effect, relevant GMSTs, and any GTS value multiplier into a second
-JSON that feeds `SCALING` — no worker changes required.
+- The exporter still emits an `alchemy` section (perks / enchantments / magic
+  effects / GMSTs / globals). It is not used by the site, but is kept for possible
+  future use.
 
 - Made for the GTS community, *Vel'dun*.
