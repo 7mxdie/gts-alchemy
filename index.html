@@ -3,11 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Alchemist's Ledger · Gate to Sovngarde</title>
-<meta name="description" content="The definitive alchemy database and recipe finder for Gate to Sovngarde. Discover the strongest potion and poison recipes, search ingredients, and rank recipes by Potency.">
+<title>The Alchemist's Ledger | Gate to Sovngarde Alchemy Database</title>
+
+<meta name="description" content="The definitive alchemy database and recipe finder for Gate to Sovngarde. Discover the strongest potion and poison recipes, browse every ingredient, and find the best combinations ranked by Potency.">
+
+<meta property="og:title" content="The Alchemist's Ledger">
+<meta property="og:description" content="The definitive alchemy database and recipe finder for Gate to Sovngarde. Discover the strongest potion and poison recipes ranked by Potency.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://7mxdie.github.io/gts-alchemy/">
+<meta property="og:image" content="https://7mxdie.github.io/gts-alchemy/preview.png">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Alchemist's Ledger">
+<meta name="twitter:description" content="The definitive alchemy database and recipe finder for Gate to Sovngarde.">
+<meta name="twitter:image" content="https://7mxdie.github.io/gts-alchemy/preview.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Spectral:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#0c0e0f;
@@ -277,7 +288,7 @@
       </div>
       <div class="title">
         <h1>The Alchemist's Ledger</h1>
-        <p class="sub"><b>Gate to Sovngarde</b> · the strongest potions & poisons, ranked by potency</p>
+        <p class="sub"><b>Gate to Sovngarde</b> · ingredient database, recipe finder & potency rankings</p>
       </div>
     </div>
     <div class="srcbar">
@@ -496,11 +507,10 @@
     gtsce:'data/gtsce.json'
   };
   const DATASETS={
-    gts:  {label:'GTS',      src:'gtsae', excludeAE:true,
-           note:'<b>Gate to Sovngarde</b> without Anniversary Edition — AE / Creation Club ingredients are hidden. Derived from the GTS+AE export until a dedicated base-GTS export is dropped in. Effects matched by magic-effect identity; food and test items excluded.'},
+  gts:  {label:'GTS',      src:'gtsae', excludeAE:true,
+       note:'<b>Gate to Sovngarde</b> without Anniversary Edition — Creation Club ingredients are hidden. Derived from the GTS+AE export until a dedicated base-GTS export is available. Potency rankings are generated directly from the exported game data.'},
     gtsae:{label:'GTS + AE', src:'gtsae', excludeAE:false,
-           note:'<b>Gate to Sovngarde</b> with Anniversary Edition — the complete ingredient set from a live load order. Effects matched by magic-effect identity, not display name; food / 24h-buff and test items excluded. Gold is a relative potency ranking; perk scaling is vanilla-style pending Adamant numbers.'},
-    gtsce:{label:'GTS CE',   src:'gtsce', excludeAE:false,
+       note:'<b>Gate to Sovngarde</b> with Anniversary Edition — extracted directly from a live load order. Effects are matched by magic-effect identity rather than display name. Food, test items and 24-hour buff ingredients are excluded. Potency is a config-independent ranking of each recipe\\'s inherent strength.'},
            note:'<b>Gate to Sovngarde: Community Edition</b> (requires Anniversary Edition) — its own export, loaded independently. Effects matched by magic-effect identity; food and test items excluded.'}
   };
   const CACHE={};      // src -> processed ingredient array (main thread copy)
