@@ -1,14 +1,55 @@
 name: "🐛 Bug Report"
-description: Report a bug
+description: Something isn't working correctly.
 title: "[Bug]: "
-labels: ["bug"]
+labels: ["🐛 bug"]
+
 body:
-- type: dropdown
-  id: dataset
-  attributes:
-    label: Dataset
-    options: [GTS, GTS + AE, GTS CE]
-- type: textarea
-  id: desc
-  attributes:
-    label: What happened?
+  - type: dropdown
+    id: dataset
+    attributes:
+      label: Dataset
+      options:
+        - GTS
+        - GTS + AE
+        - GTS CE
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Edge
+        - Firefox
+        - Safari
+        - Other
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots (optional)
+      description: Drag images into this box if helpful.

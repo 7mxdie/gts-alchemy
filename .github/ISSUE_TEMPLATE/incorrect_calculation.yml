@@ -1,9 +1,55 @@
 name: "⚗️ Incorrect Calculation"
-description: Report an incorrect calculation
+description: A recipe or value appears to be incorrect.
 title: "[Calculation]: "
-labels: ["calculation"]
+labels: ["⚗️ calculation"]
+
 body:
-- type: textarea
-  id: details
-  attributes:
-    label: Details
+  - type: dropdown
+    id: dataset
+    attributes:
+      label: Dataset
+      options:
+        - GTS
+        - GTS + AE
+        - GTS CE
+    validations:
+      required: true
+
+  - type: input
+    id: ingredients
+    attributes:
+      label: Ingredient(s)
+      placeholder: Blue Mountain Flower + Wheat
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: What looks wrong?
+    validations:
+      required: true
+
+  - type: input
+    id: skill
+    attributes:
+      label: Alchemy Skill
+      placeholder: "100"
+
+  - type: input
+    id: perks
+    attributes:
+      label: Perks selected
+
+  - type: input
+    id: gear
+    attributes:
+      label: Fortify Alchemy %
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should the result be?
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshot
