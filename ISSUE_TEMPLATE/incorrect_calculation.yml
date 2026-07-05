@@ -1,0 +1,9 @@
+name: "⚗️ Incorrect Calculation"
+description: Report an incorrect calculation
+title: "[Calculation]: "
+labels: ["calculation"]
+body:
+- type: textarea
+  id: details
+  attributes:
+    label: Details
