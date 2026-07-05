@@ -159,3 +159,49 @@ begin
 end;
 
 end.
+
+{
+  ============================================================================
+  PLANNED (v4) - data needed for EXACT GTS player-adjusted values
+  ============================================================================
+  The site's "Player Estimate" mode is driven by a small scaling config
+  (SCALING in index.html). To replace the vanilla-style fallback with GTS's
+  real numbers, extend this script to also dump the records below to a second
+  JSON (e.g. gts_scaling.json). None of this affects Base Potency.
+
+  Feasibility: all of these are ordinary records reachable the same way this
+  script already walks INGR - iterate FileByIndex -> GroupBySignature -> winning
+  override, read EditorID + the listed fields. Straightforward; no new APIs.
+
+  1. Alchemy PERKS (signature 'PERK'). Filter by EditorID and dump each perk's
+     effect entries (DATA / PRKE / EPFT / EPFD):
+       - Alchemist (rank 1-5)      -> % strength per rank
+       - Physician                 -> % on Restore Health/Stamina/Magicka
+       - Benefactor                -> % on beneficial potions
+       - Poisoner                  -> % on harmful poisons
+       - Adamant / GTS alchemy perks: strength, value, duration, magnitude,
+         extra-effect, impurity and enhanced-effect perks (Adamant uses its own
+         EditorIDs - dump all PERKs whose entry-point functions touch alchemy
+         (EPFT 'Mod Alchemy...'/'Set Value...') and let the app map them).
+
+  2. Fortify Alchemy MGEF (signature 'MGEF'). Dump the enchant/fortify-alchemy
+     magic effect(s): base cost, flags, and any GTS override of magnitude/formula
+     so the site can model gear scaling correctly instead of a flat percentage.
+
+  3. GMSTs (signature 'GMST') affecting potion crafting/value - dump EditorID +
+     value for the winning override of at least:
+       fAlchemyIngredientInitMult, fAlchemySkillFactor,
+       fAlchemyGoldMult / any GTS-added value multiplier,
+       plus any GMST GTS overrides in the alchemy space.
+
+  4. GLOBALs (signature 'GLOB') / any GTS "value reduction" global or multiplier
+     used by the overhaul - dump EditorID + value.
+
+  Output shape (suggestion) so the app can consume it as SCALING:
+    { "perks": { "Alchemist": [r1..r5], "Physician": x, "Benefactor": x,
+                 "Poisoner": x, "adamant": { "<EditorID>": {func,mag} ... } },
+      "fortifyAlchemyMGEF": { "ed":..., "baseCost":..., "flags":... },
+      "gmst": { "<EditorID>": value ... },
+      "glob": { "<EditorID>": value ... } }
+  ============================================================================
+}

@@ -256,6 +256,13 @@
   #srcSeg{width:max-content}
   #srcSeg button{font-family:'Cinzel',serif;letter-spacing:.03em;padding:7px 16px}
   .catfilters{display:inline-flex;gap:10px;align-items:center}
+  .modebar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+  #modeSeg button{font-family:'Cinzel',serif;letter-spacing:.03em;padding:7px 16px}
+  .modenote{flex:1;min-width:260px;font-size:.82rem;color:var(--muted);line-height:1.5;margin:0}
+  .modenote b{color:var(--gold);font-weight:600}
+  .estonly{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-dim);border:1px solid var(--line);border-radius:20px;padding:2px 8px;margin-left:8px;vertical-align:middle}
+  #condPanel{transition:opacity .18s ease,filter .18s ease}
+  #condPanel.dim{opacity:.45;filter:saturate(.35);pointer-events:none}
   .card ul{list-style:none;margin:0 0 14px;padding:0;display:flex;flex-direction:column;gap:5px;flex:1}
   .card li{font-size:.88rem;color:var(--parch-dim);display:flex;align-items:center;gap:8px}
   .card li .dot{width:5px;height:5px;border-radius:50%;flex:0 0 auto}
@@ -305,7 +312,7 @@
       </div>
       <div class="title">
         <h1>The Alchemist's Ledger</h1>
-        <p class="sub"><b>Gate to Sovngarde</b> · the highest-value potions, ranked by gold</p>
+        <p class="sub"><b>Gate to Sovngarde</b> · the strongest potions & poisons, ranked by potency</p>
       </div>
     </div>
     <div class="srcbar">
@@ -325,8 +332,15 @@
 
   <!-- Conditions -->
   <section>
-    <p class="eyebrow">Brewing conditions</p>
-    <div class="panel">
+    <div class="modebar">
+      <div class="seg" id="modeSeg" role="group" aria-label="Calculation mode">
+        <button data-mode="base" class="on">Base Potency</button>
+        <button data-mode="estimate">Player Estimate</button>
+      </div>
+      <p class="modenote" id="modeNote"></p>
+    </div>
+    <p class="eyebrow">Brewing conditions <span class="estonly">Player Estimate only</span></p>
+    <div class="panel" id="condPanel">
       <div class="cond-grid">
         <div class="field">
           <label for="skill">Alchemy skill <span class="v" id="skillV">100</span></label>
@@ -406,8 +420,9 @@
 
   <footer>
     <p class="eyebrow">The reckoning</p>
-    <p>Each potion takes every effect shared by two or more of its reagents — matched by the underlying magic-effect record, so two effects that merely share a name don't wrongly combine. For a shared effect the strongest reagent wins. Gold follows the game's formula — <code>baseCost × (mag × dur⁄10)^1.1</code> per effect, summed, with skill, perk and gear multipliers applied first. <b>Farmable only</b> hides unique/limited reagents; <b>Creation Club</b> and <b>Mod content</b> let you drop ingredients you don't run (e.g. Beyond Skyrim: Bruma) so the ranking matches your game. To keep it fast at 500+ reagents, the ledger ranks combinations among the highest-value reagents.</p>
-    <p style="margin-top:14px">GTS data extracted from a live load order via xEdit; AE baseline from the Unofficial Elder Scrolls Pages. Perk scaling still uses vanilla-style values pending Adamant's numbers. Made for the GTS community — <b style="color:var(--gold);font-family:'Cinzel',serif;font-weight:600">Vel'dun</b>.</p>
+    <p>Each potion takes every effect shared by two or more of its reagents — matched by the underlying magic-effect record, so two effects that merely share a name don't wrongly combine. For a shared effect the strongest reagent wins. <b>Base Potency</b> scores each effect straight from its exported strength — <code>baseCost × (mag × dur⁄10)^1.1</code>, summed — with no player scaling; this is the reliable default ranking. <b>Player Estimate</b> layers on Alchemy skill, the Alchemist perk and Fortify Alchemy gear. <b>Farmable only</b> hides unique/limited reagents; <b>Creation Club</b> and <b>Mod content</b> drop ingredients you don't run. To stay fast at 400+ reagents, the ledger ranks combinations among the highest-potency reagents.</p>
+    <p style="margin-top:14px"><b style="color:var(--gold)">Known calculation caveats.</b> GTS reworks the Alchemy perk tree, so Player Estimate perk scaling is not fully modelled yet (vanilla-style fallback). Fortify Alchemy behaviour under GTS is likewise not fully modelled. GTS's dynamic crafting — enhanced / impure potions — isn't modelled at all. And GTS applies a global value reduction that may live in a game setting rather than the records. Treat all numbers as a ranking / estimate, not exact merchant sale prices — Base Potency is the dependable ordering.</p>
+    <p style="margin-top:14px">Data extracted from live GTS / GTS CE load orders via xEdit, matched on magic-effect identity. Made for the GTS community — <b style="color:var(--gold);font-family:'Cinzel',serif;font-weight:600">Vel'dun</b>.</p>
   </footer>
 
 </div>
@@ -460,11 +475,13 @@
       }
     }
     function powerFactor(e,c,isPoison){
-      const restore=e.n==='Restore Health'||e.n==='Restore Stamina'||e.n==='Restore Magicka';
-      const phys=(c.physician&&restore)?25:0;
-      const ben=(c.benefactor&&!isPoison&&!e.h)?25:0;
-      const poi=(c.poisoner&&isPoison&&e.h)?25:0;
-      return 4.0*(1+0.5*c.skill/100)*(1+c.fortify/100)*(1+c.alch/100)*(1+phys/100)*(1+ben/100+poi/100);
+      if(c.mode!=='estimate') return 1;   // Base Potency: intrinsic effect strength only
+      var S=c.scale;
+      var restore=e.n==='Restore Health'||e.n==='Restore Stamina'||e.n==='Restore Magicka';
+      var phys=(c.physician&&restore)?S.physician:0;
+      var ben=(c.benefactor&&!isPoison&&!e.h)?S.benefactor:0;
+      var poi=(c.poisoner&&isPoison&&e.h)?S.poisoner:0;
+      return S.base*(1+S.skillPer*c.skill/100)*(1+S.fortifyPer*c.fortify/100)*(1+c.alch/100)*(1+phys/100)*(1+ben/100+poi/100);
     }
     function effV(e,c,isPoison){
       const pf=powerFactor(e,c,isPoison);
@@ -549,7 +566,22 @@
   // ---- State ----
   const state={skill:100,alch:100,fortify:0,benefactor:true,physician:true,poisoner:true,
                mix:'both',type:'all',excludeRare:false,incCC:true,incMod:true,excludeAE:false,
-               requireIdx:null,view:'potions',search:'',tab:'gtsae'};
+               requireIdx:null,view:'potions',search:'',tab:'gtsae',mode:'base'};
+
+  // ---- Player-estimate scaling model (EXPERIMENTAL, vanilla-style fallback) ----
+  // Data-driven so GTS/Adamant perk + Fortify Alchemy values can be updated here
+  // later without touching the worker. All numbers are percentages except base.
+  // (Base Potency ignores every value below — it uses raw effect strength only.)
+  const SCALING={
+    label:'Vanilla-style (experimental)',
+    base:4.0,          // crafting multiplier applied to magnitude/duration
+    skillPer:0.5,      // Alchemy skill: *(1 + skillPer * skill/100)
+    fortifyPer:1.0,    // Fortify Alchemy gear: *(1 + fortifyPer * fortify%/100)
+    alchPerRank:20,    // Alchemist perk: % strength per rank (rank 0-5)
+    physician:25,      // Physician: % on Restore Health/Stamina/Magicka
+    benefactor:25,     // Benefactor: % on beneficial (non-poison) effects
+    poisoner:25        // Poisoner: % on harmful (poison) effects
+  };
 
   const $=function(id){return document.getElementById(id);};
   const fmt=function(n){return n.toLocaleString('en-US');};
@@ -603,7 +635,8 @@
     const cfg={skill:state.skill,alch:state.alch,fortify:state.fortify,
       benefactor:state.benefactor,physician:state.physician,poisoner:state.poisoner,
       mix:state.mix,type:state.type,excludeRare:state.excludeRare,excludeAE:state.excludeAE,
-      incCC:state.incCC,incMod:state.incMod,requireIdx:state.requireIdx};
+      incCC:state.incCC,incMod:state.incMod,requireIdx:state.requireIdx,
+      mode:state.mode,scale:SCALING};
     if(!ready){pending=cfg;return;}
     run(cfg);
   }
@@ -619,11 +652,13 @@
       return;
     }
     const maxV=top[0].v;
+    const est=state.mode==='estimate';
+    const unit=est?'g':'pts';
     let filt=[];
     if(state.excludeRare)filt.push('farmable only');
     if(state.type!=='all')filt.push(state.type+'s');
     if(state.requireIdx!=null)filt.push('with '+ingName(state.requireIdx));
-    $('summary').textContent='Showing the top '+top.length+' of '+fmt(m.valid)+' valid mixtures'+(filt.length?' · '+filt.join(' · '):'')+'.';
+    $('summary').textContent=(est?'Player Estimate':'Base Potency')+' · top '+top.length+' of '+fmt(m.valid)+' valid mixtures'+(filt.length?' · '+filt.join(' · '):'')+'.';
 
     const rows=top.map(function(p,idx){
       const fill=Math.max(0.06,Math.pow(p.v/maxV,0.7)).toFixed(3);
@@ -635,14 +670,14 @@
       }).join('<span class="plus">+</span>');
       const chips=p.parts.map(function(e){
         const cls=e.h?'bad':'good';
-        return '<span class="chip '+cls+'">'+e.n+'<span class="m">'+fmt(e.v)+'g</span></span>';
+        return '<span class="chip '+cls+'">'+e.n+'<span class="m">'+fmt(e.v)+(est?'g':'')+'</span></span>';
       }).join('');
       const tagCls=p.poison?'poison':'potion';
       const tag=p.poison?'Poison':'Potion';
       return '<div class="row '+(p.poison?'poison':'')+'" style="--fill:'+fill+';animation-delay:'+Math.min(idx*14,360)+'ms">'+
         '<span class="vial"></span>'+
         '<div class="rank">'+String(idx+1).padStart(2,'0')+'</div>'+
-        '<div class="val">'+fmt(p.v)+'<span class="g">g</span></div>'+
+        '<div class="val">'+(est?'≈':'')+fmt(p.v)+'<span class="g">'+unit+'</span></div>'+
         '<div class="detail">'+
           '<div class="pname">'+p.name+'<span class="ptag '+tagCls+'">'+tag+'</span></div>'+
           '<div class="ings">'+ings+'</div>'+
@@ -756,11 +791,23 @@
   // ---- Wire controls ----
   $('srcSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;loadTab(b.dataset.tab);});
   ['incCC','incMod'].forEach(function(id){$(id).addEventListener('change',function(e){state[id]=e.target.checked;schedule();});});
+
+  // ---- Calculation mode (Base Potency vs experimental Player Estimate) ----
+  const MODE_NOTE={
+    base:'<b>Base Potency</b> ranks recipes by intrinsic effect strength from the ingredient &amp; MGEF data — no perks or gear. This is the reliable default ranking.',
+    estimate:'<b>Player Estimate</b> applies Alchemy skill, the Alchemist perk &amp; Fortify Alchemy scaling ('+SCALING.label+'). GTS reworks the Alchemy perk tree and Fortify Alchemy, so this scaling is still being verified — treat the numbers as estimates, not exact merchant sale prices.'
+  };
+  function applyMode(){
+    document.querySelectorAll('#modeSeg button').forEach(function(x){x.classList.toggle('on',x.dataset.mode===state.mode);});
+    $('condPanel').classList.toggle('dim',state.mode!=='estimate');
+    $('modeNote').innerHTML=MODE_NOTE[state.mode];
+  }
+  $('modeSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;if(b.dataset.mode===state.mode)return;state.mode=b.dataset.mode;applyMode();schedule();});
   $('skill').addEventListener('input',function(e){state.skill=+e.target.value;$('skillV').textContent=state.skill;schedule();});
   $('fortify').addEventListener('input',function(e){state.fortify=+e.target.value;$('fortV').textContent=state.fortify+'%';schedule();});
   $('alchPips').addEventListener('click',function(e){
     const b=e.target.closest('.pip');if(!b)return;
-    const r=+b.dataset.r;state.alch=r*20;
+    const r=+b.dataset.r;state.alch=r*SCALING.alchPerRank;
     $('alchPips').querySelectorAll('.pip').forEach(function(p){p.classList.toggle('on',p===b);});
     $('alchV').textContent=r+' / 5';schedule();
   });
@@ -797,6 +844,7 @@
   $('search').addEventListener('keydown',function(e){if(e.key==='Enter'&&state.view==='potions'){e.target.blur();}});
 
   // ---- Go ----
+  applyMode();
   loadTab(state.tab);
 })();
 </script>
