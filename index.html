@@ -203,6 +203,10 @@
   .ings .plus{color:var(--gold-dim);margin:0 5px;font-weight:600}
   .ings .rare{color:var(--violet);border-bottom:1px dotted var(--violet);cursor:help}
   .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .craft{margin-top:8px;font-size:.82rem}
+  .craft b{font-weight:600;color:var(--parch-dim)}
+  .craft.ok{color:var(--emerald)}
+  .craft.miss{color:var(--muted)}
   .chip{
     font-size:.75rem;padding:3px 9px;border-radius:12px;letter-spacing:.01em;
     border:1px solid transparent;white-space:nowrap;
@@ -218,6 +222,11 @@
     display:flex;flex-direction:column;
   }
   .card h3{font-family:'Cinzel',serif;font-size:1.02rem;font-weight:600;margin:0 0 3px;color:var(--parch)}
+  .owned-badge{
+    display:none;margin-left:8px;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+    font-weight:600;letter-spacing:.02em;color:var(--emerald);vertical-align:middle;
+  }
+  .owned-badge.show{display:inline}
   .card .meta{display:flex;gap:8px;align-items:center;margin-bottom:11px;font-size:.76rem;flex-wrap:wrap}
   .src{color:var(--muted);letter-spacing:.04em}
   .rar{padding:1px 7px;border-radius:10px;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase}
@@ -231,6 +240,16 @@
   #srcSeg{width:max-content}
   #srcSeg button{font-family:'Cinzel',serif;letter-spacing:.03em;padding:7px 16px}
   .catfilters{display:inline-flex;gap:10px;align-items:center}
+  #craftableOnlyWrap{
+    opacity:1;max-width:220px;overflow:hidden;
+    transition:opacity .2s ease,max-width .2s ease,padding .2s ease,margin .2s ease,border-width .2s ease;
+  }
+  #craftableOnlyWrap.craftable-hidden{
+    opacity:0;max-width:0;padding-left:0;padding-right:0;margin:0;border-width:0;pointer-events:none;
+  }
+  @media (prefers-reduced-motion:reduce){
+    #craftableOnlyWrap{transition:none}
+  }
   .potkey{font-size:.8rem;color:var(--muted);letter-spacing:.02em;margin:0 0 12px}
   .potkey b{color:var(--gold);font-weight:600}
   .info{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;margin-left:7px;
@@ -429,6 +448,99 @@
     line-height:1.55;margin:0 0 16px;
   }
   .launch-btn.small{padding:10px 26px;font-size:.8rem}
+  /* ================= Owned Ingredients ================= */
+  .owned-trigger{
+    display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    background:var(--stone);border:1px solid var(--line);border-radius:7px;
+    color:var(--parch-dim);font-family:'Spectral',serif;font-size:.85rem;
+    padding:8px 14px;transition:border-color .12s ease,color .12s ease;
+  }
+  .owned-trigger:hover{border-color:var(--gold-dim);color:var(--parch)}
+  .owned-trigger-count{
+    display:none;min-width:18px;padding:1px 6px;border-radius:9px;
+    background:var(--emerald);color:var(--ink);font-size:.72rem;font-weight:600;
+    text-align:center;font-family:'JetBrains Mono',monospace;
+  }
+  .owned-trigger-count.show{display:inline-block}
+
+  .owned-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:55;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;
+  }
+  .owned-overlay.show{opacity:1;pointer-events:auto}
+
+  .owned-drawer{
+    position:fixed;top:0;right:0;bottom:0;z-index:56;
+    width:clamp(300px,88vw,420px);
+    background:var(--stone-2);border-left:1px solid var(--line);
+    padding:22px 20px;display:flex;flex-direction:column;gap:14px;
+    transform:translateX(100%);transition:transform .26s ease;
+    overflow-y:auto;
+  }
+  .owned-drawer.open{transform:translateX(0)}
+  @media (prefers-reduced-motion:reduce){
+    .owned-overlay,.owned-drawer{transition:none}
+  }
+  .owned-drawer-head{display:flex;align-items:center;justify-content:space-between}
+  .owned-drawer-head h2{
+    font-family:'Cinzel',serif;font-size:1.1rem;color:var(--gold-bright);margin:0;
+  }
+  .owned-drawer-close{
+    background:transparent;border:0;color:var(--muted);font-size:1.3rem;
+    line-height:1;cursor:pointer;padding:2px 6px;
+  }
+  .owned-drawer-close:hover{color:var(--parch)}
+  .owned-warn{
+    font-size:.82rem;color:var(--rust);border:1px solid var(--rust);
+    border-radius:6px;padding:8px 10px;margin:0;
+  }
+  .owned-search{width:100%}
+  .owned-matches{display:none;flex-direction:column;gap:4px;max-height:220px;overflow-y:auto}
+  .owned-matches.show{display:flex}
+  .owned-match-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--stone);border:1px solid var(--line-soft);border-radius:6px;
+    color:var(--parch);font-family:'Spectral',serif;font-size:.88rem;
+    padding:8px 10px;cursor:pointer;text-align:left;
+  }
+  .owned-match-row:hover{border-color:var(--gold-dim)}
+  .owned-match-add{color:var(--muted);font-size:.78rem;white-space:nowrap}
+  .owned-match-empty{color:var(--muted);font-size:.85rem;padding:6px 2px}
+  .owned-list{display:flex;flex-direction:column;gap:6px}
+  .owned-empty{color:var(--muted);font-size:.85rem;line-height:1.5}
+  .owned-row{
+    display:flex;align-items:center;gap:10px;
+    background:var(--stone);border:1px solid var(--line-soft);border-radius:6px;
+    padding:8px 10px;
+  }
+  .owned-row-name{flex:1;font-size:.9rem;color:var(--parch)}
+  .owned-row-src{display:block;color:var(--muted);font-size:.72rem;letter-spacing:.02em;margin-top:2px}
+  .owned-row-fid{font-family:'JetBrains Mono',monospace;color:var(--gold-dim)}
+  .owned-match-row .owned-row-src{margin-top:1px}
+  .owned-stepper{display:flex;align-items:center;gap:8px}
+  .owned-stepper button{
+    width:36px;height:36px;border:1px solid var(--line);border-radius:6px;
+    background:var(--stone-2);color:var(--gold);font-size:1.05rem;line-height:1;
+    cursor:pointer;display:grid;place-items:center;
+  }
+  .owned-stepper button:hover{border-color:var(--gold-dim)}
+  .owned-count{
+    min-width:20px;text-align:center;font-family:'JetBrains Mono',monospace;
+    font-size:.88rem;color:var(--parch);
+  }
+  .owned-remove{
+    background:transparent;border:0;color:var(--muted);font-size:1.2rem;
+    line-height:1;cursor:pointer;padding:8px 10px;
+  }
+  .owned-remove:hover{color:var(--rust)}
+  .owned-drawer-foot{border-top:1px solid var(--line-soft);padding-top:12px}
+  .owned-clear-all{
+    background:transparent;border:1px solid var(--line);border-radius:6px;
+    color:var(--parch-dim);font-family:'Spectral',serif;font-size:.85rem;
+    padding:7px 12px;cursor:pointer;width:100%;
+  }
+  .owned-clear-all:hover{border-color:var(--rust);color:var(--rust)}
+  .owned-clear-all.confirming{border-color:var(--rust);color:var(--rust)}
 </style>
 </head>
 <body>
@@ -550,6 +662,7 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
         <input type="text" id="search" placeholder="Contains reagent… e.g. Salmon Roe" autocomplete="off">
       </div>
+      <button type="button" class="owned-trigger" id="ownedTrigger">Owned Ingredients<span class="owned-trigger-count" id="ownedTriggerCount"></span></button>
     </div>
 
     <!-- Potions view -->
@@ -570,6 +683,7 @@
           <label class="chk"><input type="checkbox" id="incCC" checked><span class="box"></span><span class="txt">Creation Club</span></label>
           <label class="chk"><input type="checkbox" id="incMod" checked><span class="box"></span><span class="txt">Mod content</span></label>
         </span>
+        <label class="chk craftable-hidden" id="craftableOnlyWrap"><input type="checkbox" id="craftableOnly"><span class="box"></span><span class="txt">Craftable Now</span></label>
         <div class="req" id="reqChip"><span>with&nbsp;<b id="reqName"></b></span><button id="reqClear" title="Remove filter" aria-label="Remove ingredient filter">×</button></div>
       </div>
       <p class="summary" id="summary"></p>
@@ -579,6 +693,9 @@
 
     <!-- Reagents view -->
     <div id="reagentsView" class="hidden">
+      <div class="filterline">
+        <label class="chk"><input type="checkbox" id="reagentOwnedOnly"><span class="box"></span><span class="txt">Owned only</span></label>
+      </div>
       <p class="summary" id="reagentSummary"></p>
       <div class="grid" id="grid"></div>
     </div>
@@ -592,6 +709,24 @@
   </footer>
 
 </div>
+
+<div class="owned-overlay" id="ownedOverlay" aria-hidden="true"></div>
+<aside class="owned-drawer" id="ownedDrawer" aria-hidden="true" aria-label="Owned Ingredients">
+  <div class="owned-drawer-head">
+    <h2>Owned Ingredients</h2>
+    <button type="button" class="owned-drawer-close" id="ownedDrawerClose" aria-label="Close">×</button>
+  </div>
+  <p class="owned-warn hidden" id="ownedPersistWarn">Your browser is blocking saved data (e.g. private browsing). Owned ingredients won't be remembered after you leave this page.</p>
+  <div class="search owned-search" id="ownedSearchWrap">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></svg>
+    <input type="text" id="ownedSearch" placeholder="Search an ingredient to add…" autocomplete="off">
+  </div>
+  <div class="owned-matches" id="ownedMatches"></div>
+  <div class="owned-list" id="ownedList"></div>
+  <div class="owned-drawer-foot">
+    <button type="button" class="owned-clear-all" id="ownedClearAll">Clear all</button>
+  </div>
+</aside>
 
 <script>let DATA=[];</script>
 <script>
@@ -669,6 +804,7 @@
         self.postMessage({type:'ready',key:msg.key});return;
       }
       const c=msg.cfg, reqId=msg.reqId, R=(c.requireIdx==null?-1:c.requireIdx);
+      const ownedSet=c.craftableOnly?new Set(c.ownedIdx||[]):null;
       const lists = c.mix==='2'?[C2] : c.mix==='3'?[C3] : [C2,C3];
       let out=[], minKeep=-1, valid=0;
       for(let li=0;li<lists.length;li++){
@@ -685,6 +821,11 @@
             let bad2=false;
             for(let z2=0;z2<idxs.length;z2++){const cat=DATA[idxs[z2]].cat;if(cat===1&&!c.incCC){bad2=true;break;}if(cat===2&&!c.incMod){bad2=true;break;}}
             if(bad2)continue;
+          }
+          if(c.craftableOnly){
+            let missing=false;
+            for(let z3=0;z3<idxs.length;z3++){if(!ownedSet.has(idxs[z3])){missing=true;break;}}
+            if(missing)continue;
           }
           const isP=cb.poison;
           if(c.type==='potion'&&isP)continue;
@@ -725,7 +866,7 @@
 
   // ---- State ----
   const state={mix:'both',type:'all',excludeRare:false,incCC:true,incMod:true,
-               requireIdx:null,view:'potions',search:'',tab:'gts'};
+               requireIdx:null,view:'potions',search:'',tab:'gts',ownedOnly:false,craftableOnly:false};
 
   const $=function(id){return document.getElementById(id);};
   const fmt=function(n){return n.toLocaleString('en-US');};
@@ -747,6 +888,92 @@
   };
   const CACHE={};      // src -> processed ingredient array (main thread copy)
   const builtKeys={};  // src -> true once the worker has built + cached it
+  const EDIDX={};      // src -> { ed: index into CACHE[src] }, built alongside CACHE
+
+  // ---- Inventory (Owned Ingredients) ----
+  // Public surface only: init, setActiveSource, get/set/adjust, clear,
+  // entries, isEmpty, count, persistenceOk, onChange. Everything about
+  // localStorage, the on-disk shape, and per-source keying is private to
+  // this module — callers speak only in EditorIDs and never see a "src".
+  const Inventory=(function(){
+    const STORAGE_KEY='alchemists-ledger:inventory:v1';
+    let blob=null;          // {version:1, datasets:{src:{ed:count}}}
+    let persistOk=true;
+    let activeSrc=null;
+    const listeners=[];
+
+    function emptyBlob(){return {version:1,datasets:{}};}
+
+    function load(){
+      try{
+        const raw=localStorage.getItem(STORAGE_KEY);
+        const parsed=raw?JSON.parse(raw):null;
+        blob=(parsed&&typeof parsed==='object'&&parsed.datasets)?parsed:emptyBlob();
+        persistOk=true;
+      }catch(e){
+        blob=emptyBlob();
+        persistOk=false;
+      }
+    }
+    function save(){
+      if(!persistOk)return;
+      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(blob));}
+      catch(e){persistOk=false;}
+    }
+    function activeMap(){
+      if(!blob.datasets[activeSrc])blob.datasets[activeSrc]={};
+      return blob.datasets[activeSrc];
+    }
+    function notify(){listeners.forEach(function(fn){fn();});}
+
+    function init(){load();}
+    function setActiveSource(src){
+      if(activeSrc===src)return;
+      activeSrc=src;
+      notify();
+    }
+    function get(ed){
+      if(!activeSrc)return 0;
+      const m=blob.datasets[activeSrc];
+      return (m&&m[ed])||0;
+    }
+    function set(ed,count){
+      if(!activeSrc)return;
+      const n=Math.max(0,Math.floor(count)||0);
+      const m=activeMap();
+      if(n===0)delete m[ed]; else m[ed]=n;
+      save();notify();
+    }
+    function adjust(ed,delta){set(ed,get(ed)+delta);}
+    function clear(){
+      if(!activeSrc)return;
+      blob.datasets[activeSrc]={};
+      save();notify();
+    }
+    function entries(){
+      if(!activeSrc)return [];
+      const m=blob.datasets[activeSrc]||{};
+      return Object.keys(m).map(function(ed){return {ed:ed,count:m[ed]};});
+    }
+    function isEmpty(){return entries().length===0;}
+    function count(){return entries().length;} // distinct owned ingredients, not total quantity
+    function persistenceOk(){return persistOk;}
+    function onChange(fn){listeners.push(fn);}
+
+    return {init:init,setActiveSource:setActiveSource,get:get,set:set,adjust:adjust,
+            clear:clear,entries:entries,isEmpty:isEmpty,count:count,
+            persistenceOk:persistenceOk,onChange:onChange};
+  })();
+
+  // Build the EditorID -> array-index lookup for a processed dataset. Built
+  // once per source, same lifecycle as CACHE[src]. Ingredients with a blank
+  // ed (shouldn't occur in practice, but processExport tolerates it) are
+  // skipped rather than colliding on the empty-string key.
+  function buildEdIndex(src,data){
+    const idx={};
+    for(let i=0;i<data.length;i++){if(data[i].ed)idx[data[i].ed]=i;}
+    EDIDX[src]=idx;
+  }
 
   // Turn a raw xEdit export into the internal schema client-side, so replacing
   // a dataset only means dropping a new export into its data file.
@@ -764,7 +991,7 @@
       const s=x.src||''; let cat;
       if(VANILLA[s])cat=0; else if(/^cc/i.test(s)||s==='_ResourcePack.esl')cat=1; else cat=2;
       const e=x.e.map(function(ef){return {n:ef.n,k:ef.med||ef.mid,c:+ef.c,m:+ef.m,d:+ef.d,vm:+ef.vm,vd:+ef.vd,h:+ef.h};});
-      out.push({n:x.n,s:s,r:RARE[x.n]||0,cat:cat,e:e});
+      out.push({n:x.n,s:s,r:RARE[x.n]||0,cat:cat,ed:x.ed||'',fid:x.fid||'',e:e});
     }
     return out;
   }
@@ -775,14 +1002,18 @@
   function run(cfg){lastReqId=++reqSeq;worker.postMessage({type:'compute',cfg:cfg,reqId:lastReqId});}
   function compute(){
     const cfg={mix:state.mix,type:state.type,excludeRare:state.excludeRare,
-      incCC:state.incCC,incMod:state.incMod,requireIdx:state.requireIdx};
+      incCC:state.incCC,incMod:state.incMod,requireIdx:state.requireIdx,
+      craftableOnly:state.craftableOnly};
+    if(state.craftableOnly)cfg.ownedIdx=Array.from(ownedIndexSet());
     if(!ready){pending=cfg;return;}
     run(cfg);
   }
 
   // ---- Render ledger ----
   function ingName(i){return DATA[i].n;}
+  let lastResult=null;
   function renderLedger(m){
+    lastResult=m;
     const led=$('ledger');led.classList.remove('busy');
     const top=m.top;
     if(!top.length){
@@ -795,7 +1026,14 @@
     if(state.excludeRare)filt.push('farmable only');
     if(state.type!=='all')filt.push(state.type+'s');
     if(state.requireIdx!=null)filt.push('with '+ingName(state.requireIdx));
+    if(state.craftableOnly)filt.push('craftable now');
     $('summary').textContent='Top '+top.length+' of '+fmt(m.valid)+' valid mixtures'+(filt.length?' · '+filt.join(' · '):'')+'.';
+
+    // Missing-ingredient / Craftable annotation is suppressed entirely until
+    // the player owns at least one ingredient for the active source, so the
+    // pre-ownership Ledger looks exactly as it always has.
+    const invEmpty=Inventory.isEmpty();
+    const ownedSet=invEmpty?null:ownedIndexSet();
 
     const rows=top.map(function(p,idx){
       const fill=Math.max(0.06,Math.pow(p.v/maxV,0.7)).toFixed(3);
@@ -811,6 +1049,13 @@
       }).join('');
       const tagCls=p.poison?'poison':'potion';
       const tag=p.poison?'Poison':'Potion';
+      let craft='';
+      if(!invEmpty){
+        const missing=p.i.filter(function(i){return !ownedSet.has(i);}).map(function(i){return DATA[i].n;});
+        craft=missing.length
+          ? '<div class="craft miss"><b>Missing:</b> '+missing.join(', ')+'</div>'
+          : '<div class="craft ok">Craftable now</div>';
+      }
       return '<div class="row '+(p.poison?'poison':'')+'" style="--fill:'+fill+';animation-delay:'+Math.min(idx*14,360)+'ms">'+
         '<span class="vial"></span>'+
         '<div class="rank">'+String(idx+1).padStart(2,'0')+'</div>'+
@@ -819,6 +1064,7 @@
           '<div class="pname">'+p.name+'<span class="ptag '+tagCls+'">'+tag+'</span></div>'+
           '<div class="ings">'+ings+'</div>'+
           '<div class="chips">'+chips+'</div>'+
+          craft+
         '</div>'+
       '</div>';
     }).join('');
@@ -839,8 +1085,8 @@
         return '<li class="'+(e.h?'bad':'good')+'"><span class="dot"></span>'+e.n+
                (j===0?'<span class="first">1st · eaten</span>':'')+'</li>';
       }).join('');
-      return '<div class="card" data-idx="'+i+'" data-name="'+d.n.toLowerCase()+'">'+
-        '<h3>'+d.n+'</h3>'+
+      return '<div class="card" data-idx="'+i+'" data-name="'+d.n.toLowerCase()+'" data-ed="'+d.ed+'">'+
+        '<h3>'+d.n+'<span class="owned-badge" data-owned-badge></span></h3>'+
         '<div class="meta"><span class="src">'+d.s+'</span>'+rar+catTag+gv+'</div>'+
         '<ul>'+effs+'</ul>'+
         '<button class="find" data-idx="'+i+'">Best potions with this →</button>'+
@@ -853,16 +1099,31 @@
         showReq();switchView('potions');compute();
       });
     });
+    refreshOwnedBadges();
+  }
+  // Read-only: reflects Inventory, never writes to it. Cheap DOM patch so a
+  // drawer mutation doesn't force a full grid rebuild.
+  function refreshOwnedBadges(){
+    $('grid').querySelectorAll('.card').forEach(function(c){
+      const n=Inventory.get(c.dataset.ed);
+      const badge=c.querySelector('[data-owned-badge]');
+      if(!badge)return;
+      badge.textContent=n?('Owned ×'+n):'';
+      badge.classList.toggle('show',n>0);
+    });
   }
   function filterGrid(){
     const q=state.search.trim().toLowerCase();
+    const ownedOnly=state.ownedOnly;
     let shown=0;
     $('grid').querySelectorAll('.card').forEach(function(c){
-      const hit=!q||c.dataset.name.indexOf(q)>-1;
+      const nameHit=!q||c.dataset.name.indexOf(q)>-1;
+      const ownedHit=!ownedOnly||Inventory.get(c.dataset.ed)>0;
+      const hit=nameHit&&ownedHit;
       c.classList.toggle('hidden',!hit); if(hit)shown++;
     });
     const total=$('grid').querySelectorAll('.card').length;
-    $('reagentSummary').textContent=shown+' of '+total+' reagents';
+    $('reagentSummary').textContent=shown+' of '+total+' reagents'+(ownedOnly?' · owned only':'');
   }
 
   // ---- View switching ----
@@ -903,6 +1164,7 @@
     function activate(){
       if(myseq!==loadSeq)return;          // a newer switch superseded this one
       DATA=CACHE[src]; gridBuilt=false; $('grid').innerHTML='';
+      Inventory.setActiveSource(src);
       if(builtKeys[src]){worker.postMessage({type:'activate',key:src});}
       else{worker.postMessage({type:'init',key:src,data:DATA});builtKeys[src]=true;}
       if(state.view==='reagents'){buildGrid();filterGrid();}
@@ -918,6 +1180,7 @@
     }).then(function(raw){
       if(myseq!==loadSeq)return;
       CACHE[src]=processExport(raw);
+      buildEdIndex(src,CACHE[src]);
       $('ledger').innerHTML='<div class="empty">Distilling the ledger…</div>';
       activate();
     }).catch(function(err){
@@ -949,6 +1212,8 @@
     $('typeSeg').querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b);});schedule();
   });
   $('reqClear').addEventListener('click',function(){state.requireIdx=null;showReq();compute();});
+  $('reagentOwnedOnly').addEventListener('change',function(e){state.ownedOnly=e.target.checked;filterGrid();});
+  $('craftableOnly').addEventListener('change',function(e){state.craftableOnly=e.target.checked;schedule();});
   document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){switchView(t.dataset.view);});});
 
   let sTimer=null;
@@ -1053,7 +1318,255 @@
   $('launchBtn').addEventListener('click',function(e){launchLedger(e.currentTarget);});
   $('retryBtn').addEventListener('click',function(){showLoadingTip();loadTab(state.tab);});
 
+  // ---- Owned Ingredients drawer ----
+  // UI-only glue: translates ed <-> display name via EDIDX/DATA for
+  // rendering, but every mutation goes through the Inventory interface.
+  // Inventory has no idea DATA, EDIDX, or the DOM exist.
+  function currentSrcKey(){return DATASETS[state.tab].src;}
+  // Returns the full ingredient record for a display name, so callers can
+  // show source plugin (d.s) alongside the name — the same disambiguator
+  // the Reagent Index already uses for GTS's ~7% of ingredients that share
+  // a display name across genuinely distinct records.
+  function ownedRecord(ed){
+    const idx=EDIDX[currentSrcKey()]&&EDIDX[currentSrcKey()][ed];
+    return (idx!=null&&DATA[idx])?DATA[idx]:null;
+  }
+  function ownedName(ed){
+    const d=ownedRecord(ed);
+    return d?d.n:ed;
+  }
+  // Shared ordering for any list of ingredient records shown in the drawer:
+  // name, then vanilla/CC/mod (reusing the same `cat` the Reagent Index
+  // already shows), then source plugin, then FormID as a final tie-breaker.
+  function compareIngredients(a,b){
+    if(a.n!==b.n)return a.n<b.n?-1:1;
+    if(a.cat!==b.cat)return a.cat-b.cat;
+    if(a.s!==b.s)return a.s<b.s?-1:1;
+    return a.fid<b.fid?-1:a.fid>b.fid?1:0;
+  }
+  // A FormID tag is only ever shown for records that are still identical in
+  // name AND source plugin after sorting — the rare, genuine "same item in
+  // every way the player can see" case (e.g. Salt Pile: a quest duplicate
+  // and the ordinary ingredient, same plugin, same effects). Everywhere
+  // else this returns an empty set and the drawer stays exactly as clean
+  // as before.
+  function fidNeeded(records){
+    const bySig={};
+    records.forEach(function(d){
+      const sig=d.n+'|'+d.s;
+      (bySig[sig]||(bySig[sig]=[])).push(d);
+    });
+    const need=new Set();
+    Object.keys(bySig).forEach(function(sig){
+      if(bySig[sig].length>1)bySig[sig].forEach(function(d){need.add(d.ed);});
+    });
+    return need;
+  }
+  function ingredientLabel(d,needFid){
+    const fidTag=needFid.has(d.ed)?' · <span class="owned-row-fid">#'+d.fid+'</span>':'';
+    return '<span>'+d.n+'<span class="owned-row-src">'+d.s+fidTag+'</span></span>';
+  }
+  // Full effect signature (identity key + numeric values), not just which
+  // effects are present — two records only collapse if they're truly
+  // interchangeable for alchemy purposes, not merely similarly-named.
+  function effectSignature(d){
+    return d.e.map(function(e){return e.k+':'+e.c+':'+e.m+':'+e.d+':'+e.vm+':'+e.vd+':'+e.h;})
+               .sort().join('|');
+  }
+  // Search-results-only presentation collapse: records with the same name,
+  // same source plugin, and identical effect signature are alchemically
+  // indistinguishable, so showing them as separate rows is noise, not
+  // information. Never applied to the owned list (which reflects real
+  // stored ed-keyed data) and never merges records that differ by source
+  // or effects. The representative is chosen via the existing sort order,
+  // so which literal record gets the click is deterministic.
+  function collapseIdenticalMatches(records){
+    const groups={};
+    records.forEach(function(d){
+      const key=d.n+'\u0001'+d.s+'\u0001'+effectSignature(d);
+      (groups[key]||(groups[key]=[])).push(d);
+    });
+    return Object.keys(groups).map(function(key){
+      return groups[key].slice().sort(compareIngredients)[0];
+    });
+  }
+  // Shared by rendering and Enter-to-add, so Enter always acts on the same
+  // authoritative list the player is currently looking at rather than a
+  // possibly-stale debounced render.
+  function computeOwnedMatches(q){
+    q=q.trim().toLowerCase();
+    if(!q)return {results:[],needFid:new Set()};
+    let results=[];
+    for(let i=0;i<DATA.length;i++){
+      if(DATA[i].n.toLowerCase().indexOf(q)>-1)results.push(DATA[i]);
+    }
+    results=collapseIdenticalMatches(results);
+    results.sort(compareIngredients);
+    const needFid=fidNeeded(results); // pre-truncation so a colliding pair is never split by the cap
+    return {results:results.slice(0,8),needFid:needFid};
+  }
+  // Main-thread glue only: translates Inventory's ed-keyed ownership into
+  // the active source's array indices for the worker/renderLedger. Inventory
+  // itself never sees an index.
+  function ownedIndexSet(){
+    const idxMap=EDIDX[currentSrcKey()]||{};
+    const set=new Set();
+    Inventory.entries().forEach(function(e){
+      const idx=idxMap[e.ed];
+      if(idx!=null)set.add(idx);
+    });
+    return set;
+  }
+  function updateCraftableControlVisibility(){
+    const empty=Inventory.isEmpty();
+    $('craftableOnlyWrap').classList.toggle('craftable-hidden',empty);
+    if(empty&&state.craftableOnly){
+      state.craftableOnly=false;
+      $('craftableOnly').checked=false;
+      compute();
+    }
+  }
+  function updateOwnedTriggerCount(){
+    const n=Inventory.count();
+    const el=$('ownedTriggerCount');
+    el.textContent=n?String(n):'';
+    el.classList.toggle('show',n>0);
+  }
+  function renderOwnedPersistWarn(){
+    $('ownedPersistWarn').classList.toggle('hidden',Inventory.persistenceOk());
+  }
+  function renderOwnedList(){
+    const records=Inventory.entries().map(function(e){
+      return {rec:ownedRecord(e.ed),entry:e};
+    }).filter(function(x){return x.rec;});
+    records.sort(function(a,b){return compareIngredients(a.rec,b.rec);});
+    if(!records.length){
+      $('ownedList').innerHTML='<p class="owned-empty">No owned ingredients yet for this dataset. Search above to add some.</p>';
+      return;
+    }
+    const needFid=fidNeeded(records.map(function(x){return x.rec;}));
+    $('ownedList').innerHTML=records.map(function(x){
+      const d=x.rec,e=x.entry;
+      return '<div class="owned-row" data-ed="'+e.ed+'">'+
+        '<span class="owned-row-name">'+ingredientLabel(d,needFid)+'</span>'+
+        '<div class="owned-stepper">'+
+          '<button type="button" class="owned-dec" aria-label="Decrease">−</button>'+
+          '<span class="owned-count">'+e.count+'</span>'+
+          '<button type="button" class="owned-inc" aria-label="Increase">+</button>'+
+        '</div>'+
+        '<button type="button" class="owned-remove" aria-label="Remove">×</button>'+
+      '</div>';
+    }).join('');
+  }
+  function renderOwnedMatches(q){
+    const box=$('ownedMatches');
+    if(!q.trim()){box.innerHTML='';box.classList.remove('show');return;}
+    const m=computeOwnedMatches(q);
+    box.innerHTML=m.results.length?m.results.map(function(d){
+      const owned=Inventory.get(d.ed);
+      return '<button type="button" class="owned-match-row" data-ed="'+d.ed+'">'+
+        ingredientLabel(d,m.needFid)+
+        '<span class="owned-match-add">'+(owned?'Owned ×'+owned:'Add')+'</span>'+
+      '</button>';
+    }).join(''):'<div class="owned-match-empty">No ingredients found — try a different spelling?</div>';
+    box.classList.add('show');
+  }
+
+  function openOwnedDrawer(){
+    $('ownedOverlay').classList.add('show');
+    $('ownedDrawer').classList.add('open');
+    $('ownedOverlay').setAttribute('aria-hidden','false');
+    $('ownedDrawer').setAttribute('aria-hidden','false');
+    resetClearConfirm();
+    renderOwnedPersistWarn();
+    renderOwnedList();
+    $('ownedSearch').value='';
+    renderOwnedMatches('');
+    $('ownedSearch').focus();
+  }
+  function closeOwnedDrawer(){
+    $('ownedOverlay').classList.remove('show');
+    $('ownedDrawer').classList.remove('open');
+    $('ownedOverlay').setAttribute('aria-hidden','true');
+    $('ownedDrawer').setAttribute('aria-hidden','true');
+    $('ownedTrigger').focus();
+  }
+
+  Inventory.onChange(function(){
+    updateOwnedTriggerCount();
+    updateCraftableControlVisibility();
+    if($('ownedDrawer').classList.contains('open')){
+      renderOwnedList();
+      renderOwnedPersistWarn();
+    }
+    if(gridBuilt&&state.view==='reagents'){
+      refreshOwnedBadges();
+      filterGrid();
+    }
+    if(state.view==='potions'){
+      if(state.craftableOnly)compute();          // filter set changed -> needs a real worker pass
+      else if(lastResult)renderLedger(lastResult); // just refresh annotations on cached results
+    }
+  });
+
+  $('ownedTrigger').addEventListener('click',openOwnedDrawer);
+  $('ownedDrawerClose').addEventListener('click',closeOwnedDrawer);
+  $('ownedOverlay').addEventListener('click',closeOwnedDrawer);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&$('ownedDrawer').classList.contains('open'))closeOwnedDrawer();
+  });
+  let ownedSearchTimer=null;
+  $('ownedSearch').addEventListener('input',function(e){
+    clearTimeout(ownedSearchTimer);
+    const val=e.target.value;
+    ownedSearchTimer=setTimeout(function(){renderOwnedMatches(val);},150);
+  });
+  $('ownedSearch').addEventListener('keydown',function(e){
+    if(e.key!=='Enter')return;
+    e.preventDefault();
+    clearTimeout(ownedSearchTimer);
+    const m=computeOwnedMatches(e.target.value);
+    if(!m.results.length)return;
+    Inventory.adjust(m.results[0].ed,1);
+    e.target.value='';
+    renderOwnedMatches('');
+    e.target.focus();
+  });
+  $('ownedMatches').addEventListener('click',function(e){
+    const b=e.target.closest('.owned-match-row');if(!b)return;
+    Inventory.adjust(b.dataset.ed,1);
+    renderOwnedMatches($('ownedSearch').value);
+  });
+  $('ownedList').addEventListener('click',function(e){
+    const row=e.target.closest('.owned-row');if(!row)return;
+    const ed=row.dataset.ed;
+    if(e.target.closest('.owned-inc'))Inventory.adjust(ed,1);
+    else if(e.target.closest('.owned-dec'))Inventory.adjust(ed,-1);
+    else if(e.target.closest('.owned-remove'))Inventory.set(ed,0);
+  });
+  // Two-step in-place confirm: first click arms it (relabels + auto-reverts
+  // after a few seconds), second click within that window actually clears.
+  let clearConfirmTimer=null;
+  function resetClearConfirm(){
+    clearTimeout(clearConfirmTimer);
+    const btn=$('ownedClearAll');
+    btn.classList.remove('confirming');
+    btn.textContent='Clear all';
+  }
+  $('ownedClearAll').addEventListener('click',function(e){
+    const btn=e.currentTarget;
+    if(btn.classList.contains('confirming')){
+      resetClearConfirm();
+      Inventory.clear();
+      return;
+    }
+    btn.classList.add('confirming');
+    btn.textContent='Are you sure? Click again to confirm';
+    clearConfirmTimer=setTimeout(resetClearConfirm,3000);
+  });
+
   // ---- Go ----
+  Inventory.init();
   loadTab(state.tab);
 })();
 </script>
