@@ -291,8 +291,7 @@
     </div>
     <div class="srcbar">
       <div class="seg" id="srcSeg" role="group" aria-label="Dataset">
-        <button data-tab="gts">GTS</button>
-        <button data-tab="gtsae" class="on">GTS + AE</button>
+        <button data-tab="gts" class="on">GTS</button>
         <button data-tab="gtsce">GTS CE</button>
       </div>
     </div>
@@ -448,11 +447,6 @@
             for(let z=0;z<idxs.length;z++){const ix=idxs[z];if(DATA[ix].r>0&&ix!==R){bad=true;break;}}
             if(bad)continue;
           }
-          if(c.excludeAE){
-            let badA=false;
-            for(let za=0;za<idxs.length;za++){if(DATA[idxs[za]].ae){badA=true;break;}}
-            if(badA)continue;
-          }
           if(!c.incCC||!c.incMod){
             let bad2=false;
             for(let z2=0;z2<idxs.length;z2++){const cat=DATA[idxs[z2]].cat;if(cat===1&&!c.incCC){bad2=true;break;}if(cat===2&&!c.incMod){bad2=true;break;}}
@@ -489,27 +483,25 @@
     if(m.type==='result'){ if(m.reqId!==lastReqId) return; renderLedger(m); }
   };
   // ---- State ----
-  const state={mix:'both',type:'all',excludeRare:false,incCC:true,incMod:true,excludeAE:false,
-               requireIdx:null,view:'potions',search:'',tab:'gtsae'};
+  const state={mix:'both',type:'all',excludeRare:false,incCC:true,incMod:true,
+               requireIdx:null,view:'potions',search:'',tab:'gts'};
 
   const $=function(id){return document.getElementById(id);};
   const fmt=function(n){return n.toLocaleString('en-US');};
   const RARE_LABEL={1:'Rare / limited',2:'Unique — quest only'};
 
   // ---- Dataset registry: add or replace a dataset by editing these objects ----
-  // Each tab points at a source file. The base "GTS" tab reuses the GTS+AE
-  // export and hides Anniversary Edition / Creation Club content via excludeAE,
-  // so a dedicated base-GTS export can later be swapped in with no other change.
+  // GTS and GTS CE are the only two datasets — there is no genuine non-AE
+  // export, so "GTS" here is the full GTS+AE export; Creation Club / Mod
+  // content are narrowed via the checkboxes below, not a separate tab.
   const SOURCES={
-    gtsae:'data/gtsae.json',
+    gts:'data/gtsae.json',
     gtsce:'data/gtsce.json'
   };
   const DATASETS={
-    gts:  {label:'GTS',      src:'gtsae', excludeAE:true,
-           note:'<b>Gate to Sovngarde</b> without Anniversary Edition — Creation Club ingredients are hidden. Derived from the GTS+AE export until a dedicated base-GTS export is available. Potency rankings are generated directly from the exported game data.'},
-    gtsae:{label:'GTS + AE', src:'gtsae', excludeAE:false,
-           note:'<b>Gate to Sovngarde</b> with Anniversary Edition — extracted directly from a live load order. Effects are matched by magic-effect identity rather than display name. Food, test items and 24-hour buff ingredients are excluded. Potency is a config-independent ranking of each recipe’s inherent strength.'},
-    gtsce:{label:'GTS CE',   src:'gtsce', excludeAE:false,
+    gts:  {label:'GTS',    src:'gts',
+           note:'<b>Gate to Sovngarde</b> — extracted directly from a live load order, including Anniversary Edition and Creation Club content. Effects are matched by magic-effect identity rather than display name. Food, test items and 24-hour buff ingredients are excluded. Use the <b>Creation Club</b> and <b>Mod content</b> filters below to narrow results to your own load order. Potency is a config-independent ranking of each recipe’s inherent strength.'},
+    gtsce:{label:'GTS CE', src:'gtsce',
            note:'<b>Gate to Sovngarde: Community Edition</b> (requires Anniversary Edition) — its own export, loaded independently. Effects matched by magic-effect identity; food and test items excluded.'}
   };
   const CACHE={};      // src -> processed ingredient array (main thread copy)
@@ -531,7 +523,7 @@
       const s=x.src||''; let cat;
       if(VANILLA[s])cat=0; else if(/^cc/i.test(s)||s==='_ResourcePack.esl')cat=1; else cat=2;
       const e=x.e.map(function(ef){return {n:ef.n,k:ef.med||ef.mid,c:+ef.c,m:+ef.m,d:+ef.d,vm:+ef.vm,vd:+ef.vd,h:+ef.h};});
-      out.push({n:x.n,s:s,r:RARE[x.n]||0,cat:cat,ae:cat===1?1:0,e:e});
+      out.push({n:x.n,s:s,r:RARE[x.n]||0,cat:cat,e:e});
     }
     return out;
   }
@@ -541,7 +533,7 @@
   function schedule(){clearTimeout(timer);timer=setTimeout(compute,180);$('ledger').classList.add('busy');}
   function run(cfg){lastReqId=++reqSeq;worker.postMessage({type:'compute',cfg:cfg,reqId:lastReqId});}
   function compute(){
-    const cfg={mix:state.mix,type:state.type,excludeRare:state.excludeRare,excludeAE:state.excludeAE,
+    const cfg={mix:state.mix,type:state.type,excludeRare:state.excludeRare,
       incCC:state.incCC,incMod:state.incMod,requireIdx:state.requireIdx};
     if(!ready){pending=cfg;return;}
     run(cfg);
@@ -597,7 +589,8 @@
   function buildGrid(){
     const grid=$('grid');
     grid.innerHTML=DATA.map(function(d,i){
-      if(state.excludeAE&&d.ae)return '';
+      if(!state.incCC&&d.cat===1)return '';
+      if(!state.incMod&&d.cat===2)return '';
       const rar=d.r>0?'<span class="rar '+(d.r===2?'unique':'rare')+'">'+(d.r===2?'Unique':'Rare')+'</span>':'';
       const catTag=(d.cat!=null)?'<span class="cat c'+d.cat+'">'+(d.cat===0?'Vanilla':d.cat===1?'CC/AE':'Mod')+'</span>':'';
       const gv=(typeof d.g==='number')?'<span class="gv">'+d.g+'g</span>':'';
@@ -658,7 +651,7 @@
   let loadSeq=0;
   function loadTab(tabKey){
     const t=DATASETS[tabKey]; if(!t)return;
-    state.tab=tabKey; state.excludeAE=t.excludeAE;
+    state.tab=tabKey;
     state.requireIdx=null; showReq();
     document.querySelectorAll('#srcSeg button').forEach(function(x){x.classList.toggle('on',x.dataset.tab===tabKey);});
     $('dataNote').innerHTML=t.note;
@@ -694,7 +687,14 @@
 
   // ---- Wire controls ----
   $('srcSeg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;loadTab(b.dataset.tab);});
-  ['incCC','incMod'].forEach(function(id){$(id).addEventListener('change',function(e){state[id]=e.target.checked;schedule();});});
+  ['incCC','incMod'].forEach(function(id){
+    $(id).addEventListener('change',function(e){
+      state[id]=e.target.checked;
+      schedule();
+      gridBuilt=false;
+      if(state.view==='reagents'){buildGrid();filterGrid();}
+    });
+  });
 
   $('excludeRare').addEventListener('change',function(e){state.excludeRare=e.target.checked;schedule();});
   $('mixSeg').addEventListener('click',function(e){
