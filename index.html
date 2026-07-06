@@ -255,7 +255,6 @@
   /* ---------- Footer ---------- */
   footer{padding:44px 0 60px;color:var(--muted);font-size:.84rem;line-height:1.6}
   footer .eyebrow{color:var(--muted)}
-  footer code{font-family:'JetBrains Mono',monospace;font-size:.82em;color:var(--parch-dim);background:var(--stone);padding:2px 6px;border-radius:4px}
   footer a{color:var(--gold)}
 
   :focus-visible{outline:2px solid var(--violet);outline-offset:3px;border-radius:3px}
@@ -352,9 +351,9 @@
 
   <footer>
     <p class="eyebrow">The reckoning</p>
-    <p>Each potion takes every effect shared by two or more of its reagents — matched by the underlying magic-effect record, so two effects that merely share a name don't wrongly combine. For a shared effect the strongest reagent wins. <b>Potency</b> scores each effect straight from its exported strength — <code>baseCost × (mag × dur⁄10)^1.1</code>, summed — with no player scaling, so the ranking is the same for everyone. <b>Farmable only</b> hides unique/limited reagents; <b>Creation Club</b> and <b>Mod content</b> drop ingredients you don't run. To stay fast at 400+ reagents, the ledger ranks combinations among the highest-potency reagents.</p>
-    <p style="margin-top:14px"><b style="color:var(--gold)">A note on numbers.</b> Potency is a config-independent ranking of a recipe's inherent strength, not its exact in-game magnitude or gold value. Your actual results depend on your Alchemy skill, perks, Fortify Alchemy gear and traits — and GTS changes those over time — so check an alchemy table in-game for your character's precise numbers.</p>
-    <p style="margin-top:14px">Data extracted from live GTS / GTS CE load orders via xEdit, matched on magic-effect identity. Made for the GTS community — <b style="color:var(--gold);font-family:'Cinzel',serif;font-weight:600">Vel'dun</b>.</p>
+    <p>Potency provides a consistent way to compare recipes using exported Gate to Sovngarde data.</p>
+    <p style="margin-top:14px">Your character's final potion strength will still depend on your Alchemy skill, perks and equipment.</p>
+    <p style="margin-top:14px">Built using live Gate to Sovngarde and Gate to Sovngarde Community Edition data.</p>
   </footer>
 
 </div>
