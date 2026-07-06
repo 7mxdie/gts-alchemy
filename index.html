@@ -755,25 +755,39 @@
     // Build valid combos from effect-sharing groups only, over the top-CAP
     // ingredients by best-effect value (an ingredient outside that set cannot
     // form a top potion). Exact naive O(N^3) is infeasible at 500+ ingredients.
-    function build(){
-      C2=[];C3=[];
-      var N=DATA.length, NN=N;
-      var order=[];for(var i=0;i<N;i++)order.push(i);
+    function cappedOrder(){
+      var N=DATA.length, order=[];for(var i=0;i<N;i++)order.push(i);
       if(N>CAP){order.sort(function(a,b){return bestPot(b)-bestPot(a);});order=order.slice(0,CAP);}
+      return order;
+    }
+    function uniqOrder(arr){
+      var seen=new Set(), out=[];
+      for(var i=0;i<arr.length;i++){var ix=arr[i];if(ix==null||ix<0||ix>=DATA.length||seen.has(ix))continue;seen.add(ix);out.push(ix);}
+      return out;
+    }
+    function buildFrom(order){
+      var c2=[], c3=[];
+      order=uniqOrder(order);
+      var N=DATA.length, NN=N;
       var km={};
       for(var oi=0;oi<order.length;oi++){var ix=order[oi],es=DATA[ix].e;for(var j=0;j<es.length;j++){var key=ekey(es[j]);(km[key]||(km[key]=[])).push(ix);}}
       var pairs=[], pseen=new Set();
       for(var kk in km){var arr=km[kk];for(var x=0;x<arr.length;x++)for(var y=x+1;y<arr.length;y++){var a=arr[x],b=arr[y];if(a>b){var t=a;a=b;b=t;}var pid=a*NN+b;if(pseen.has(pid))continue;pseen.add(pid);pairs.push([a,b]);}}
-      for(var pi=0;pi<pairs.length;pi++){var r=mk(pairs[pi]);if(r)C2.push(r);}
+      for(var pi=0;pi<pairs.length;pi++){var r=mk(pairs[pi]);if(r)c2.push(r);}
       var tseen=new Set();
       for(var pj=0;pj<pairs.length;pj++){var pa=pairs[pj][0],pb=pairs[pj][1];
         for(var oj=0;oj<order.length;oj++){var c=order[oj];if(c===pa||c===pb)continue;
           var s0=pa,s1=pb,s2=c,tmp;
           if(s0>s1){tmp=s0;s0=s1;s1=tmp;} if(s1>s2){tmp=s1;s1=s2;s2=tmp;} if(s0>s1){tmp=s0;s0=s1;s1=tmp;}
           var tid=(s0*NN+s1)*NN+s2; if(tseen.has(tid))continue; tseen.add(tid);
-          var r3=mk([s0,s1,s2]); if(r3)C3.push(r3);
+          var r3=mk([s0,s1,s2]); if(r3)c3.push(r3);
         }
       }
+      return {C2:c2,C3:c3};
+    }
+    function build(){
+      var b=buildFrom(cappedOrder());
+      C2=b.C2;C3=b.C3;
     }
     function powerFactor(e,c,isPoison){ return 1; }  // Potency is config-independent (no perks/gear)
     function effV(e,c,isPoison){
@@ -805,7 +819,17 @@
       }
       const c=msg.cfg, reqId=msg.reqId, R=(c.requireIdx==null?-1:c.requireIdx);
       const ownedSet=c.craftableOnly?new Set(c.ownedIdx||[]):null;
-      const lists = c.mix==='2'?[C2] : c.mix==='3'?[C3] : [C2,C3];
+      var useC2=C2, useC3=C3;
+      if(c.craftableOnly){
+        var ownedOrder=Array.from(ownedSet||[]);
+        var ownedBuild=buildFrom(ownedOrder);
+        useC2=ownedBuild.C2;useC3=ownedBuild.C3;
+      }else if(R>=0){
+        var reqOrder=cappedOrder();reqOrder.push(R);
+        var reqBuild=buildFrom(reqOrder);
+        useC2=reqBuild.C2;useC3=reqBuild.C3;
+      }
+      const lists = c.mix==='2'?[useC2] : c.mix==='3'?[useC3] : [useC2,useC3];
       let out=[], minKeep=-1, valid=0;
       for(let li=0;li<lists.length;li++){
         const L=lists[li];
