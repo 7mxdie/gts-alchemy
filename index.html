@@ -265,10 +265,245 @@
     .val{font-size:1.15rem;min-width:0}
     .detail{flex-basis:100%;padding-left:12px}
   }
+
+  /* ================= Landing ================= */
+  .landing{
+    position:relative;
+    min-height:100vh;
+    min-height:100svh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    background:url('assets/hero.webp') center center / cover no-repeat, var(--ink);
+    padding:8vh 20px 6vh;
+    overflow:hidden;
+  }
+  /* Scrim: darkens the top so text always reads regardless of what sits behind
+     it, and darkens the lower third so the accordion has a calm surface to
+     sit on rather than competing with the stone floor detail. */
+  .landing::before{
+    content:"";
+    position:absolute;inset:0;
+    background:
+      radial-gradient(60% 45% at 50% 26%, rgba(0,0,0,.72) 0%, rgba(0,0,0,.38) 55%, transparent 78%),
+      linear-gradient(to bottom, rgba(0,0,0,.12) 0%, rgba(0,0,0,.10) 40%, rgba(0,0,0,.55) 75%, rgba(0,0,0,.86) 100%);
+    pointer-events:none;
+  }
+  @media (prefers-reduced-motion:no-preference){
+    .landing{background-size:104% auto,cover;animation:heroDrift 26s ease-in-out infinite alternate}
+    @keyframes heroDrift{
+      from{background-position:center 42%,center}
+      to{background-position:center 50%,center}
+    }
+  }
+  .hero-content{
+    position:relative;z-index:1;
+    max-width:640px;text-align:center;
+    margin-top:auto;margin-bottom:6vh;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .hero-crest svg{width:64px;height:64px;display:block;margin:0 auto 18px}
+  .hero-content h1{
+    font-family:'Cinzel',serif;font-weight:700;
+    font-size:clamp(2.3rem,6.4vw,3.6rem);
+    letter-spacing:.03em;line-height:1.05;margin:0;
+    color:var(--parch);
+    text-shadow:0 2px 18px rgba(0,0,0,.65);
+  }
+  .hero-kicker{
+    font-family:'Cinzel',serif;font-size:.74rem;font-weight:600;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--gold);
+    margin:10px 0 0;
+  }
+  .hero-desc{
+    font-family:'Spectral',serif;font-size:1.02rem;color:var(--parch-dim);
+    line-height:1.6;margin:18px 0 0;text-shadow:0 1px 10px rgba(0,0,0,.6);
+  }
+  .launch-btn{
+    margin-top:30px;
+    font-family:'Cinzel',serif;font-size:.92rem;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--gold-bright);
+    background:rgba(20,24,26,.72);
+    border:1px solid var(--gold-dim);
+    border-radius:6px;
+    padding:15px 38px;
+    cursor:pointer;
+    transition:all .16s ease;
+    box-shadow:0 0 0 rgba(230,200,119,0);
+  }
+  .launch-btn:hover{
+    border-color:var(--gold);
+    background:rgba(201,162,74,.14);
+    box-shadow:0 0 22px rgba(201,162,74,.18);
+  }
+
+  .landing-accordion{
+    position:relative;z-index:1;
+    width:100%;max-width:700px;margin-top:auto;
+  }
+  .acc-item{
+    border:1px solid var(--line);border-radius:7px;overflow:hidden;
+    background:rgba(20,24,26,.82);backdrop-filter:blur(2px);
+    margin-bottom:8px;
+  }
+  .acc-item summary{
+    list-style:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:13px 18px;
+    font-family:'Cinzel',serif;font-size:.82rem;font-weight:600;
+    letter-spacing:.05em;text-transform:uppercase;color:var(--parch);
+    transition:color .12s ease;
+  }
+  .acc-item summary::-webkit-details-marker{display:none}
+  .acc-item summary:hover{color:var(--gold-bright)}
+  .acc-item summary::after{
+    content:"";flex:0 0 auto;width:8px;height:8px;
+    border-right:2px solid var(--gold-dim);border-bottom:2px solid var(--gold-dim);
+    transform:rotate(45deg);transition:transform .16s ease;
+  }
+  .acc-item[open] summary::after{transform:rotate(-135deg)}
+  .acc-item[open] summary{color:var(--gold-bright);border-bottom:1px solid var(--line-soft)}
+  .acc-body{
+    padding:4px 18px 17px;
+    font-family:'Spectral',serif;font-size:.92rem;line-height:1.6;
+    color:var(--parch-dim);
+  }
+  .acc-body b{color:var(--gold);font-weight:600}
+  .acc-body p{margin:0 0 10px}
+  .acc-body p:last-child{margin-bottom:0}
+  .potency-formula{
+    text-align:center;font-family:'JetBrains Mono',monospace;font-size:1rem;
+    color:var(--gold-bright);letter-spacing:.02em;
+    margin:16px 0 !important;padding:13px 10px;
+    border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft);
+    background:rgba(201,162,74,.05);
+  }
+  .potency-formula sup{font-size:.68em;color:var(--gold);margin-left:1px}
+  .potency-formula.conceptual{
+    font-style:italic;color:var(--parch-dim);
+    border-color:var(--line-soft);background:none;
+    font-size:.92rem;line-height:1.6;
+  }
+  .formula-caption{
+    text-align:center;font-size:.76rem;font-style:italic;color:var(--muted);
+    margin:-8px 0 10px !important;
+  }
+
+  @media (max-width:560px){
+    .landing{padding:7vh 16px 5vh}
+    .hero-content{margin-bottom:4vh}
+    .hero-desc{font-size:.92rem}
+  }
+
+  /* ================= App visibility ================= */
+  #app{display:none}
+  #app.active{display:block}
+
+  /* ================= Launch overlay ================= */
+  #launchOverlay{
+    position:fixed;inset:0;z-index:50;
+    background:#000;
+    opacity:0;
+    transition:opacity .5s ease;
+    pointer-events:none;
+    display:flex;align-items:center;justify-content:center;
+  }
+  #launchOverlay.dim{opacity:.5;pointer-events:auto}
+  #launchOverlay.active{opacity:1;pointer-events:auto;transition-duration:.6s}
+  @media (prefers-reduced-motion:reduce){
+    #launchOverlay{transition:none}
+  }
+  .launch-btn.pressed{transform:scale(.96);box-shadow:0 0 16px rgba(201,162,74,.3)}
+  .loading-inner{max-width:420px;text-align:center;padding:0 24px}
+  .loading-mark svg{width:44px;height:44px;display:block;margin:0 auto 20px}
+  .loading-label{
+    font-family:'Cinzel',serif;font-size:.8rem;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--gold);margin:0 0 14px;
+  }
+  .loading-tip{
+    font-family:'Spectral',serif;font-style:italic;font-size:.95rem;
+    color:var(--parch-dim);line-height:1.55;margin:0;
+  }
+  .loading-error p{
+    font-family:'Spectral',serif;font-size:.92rem;color:var(--parch-dim);
+    line-height:1.55;margin:0 0 16px;
+  }
+  .launch-btn.small{padding:10px 26px;font-size:.8rem}
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<div class="landing" id="landing">
+  <div class="hero-content">
+    <div class="hero-crest" aria-hidden="true">
+      <svg viewBox="0 0 60 60" fill="none">
+        <path d="M24 8 h12 M26 8 v13 L15 44 a7 7 0 0 0 6 11 h18 a7 7 0 0 0 6-11 L34 21 V8"
+              stroke="var(--gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="M19 37 a7 7 0 0 0 5 17 h12 a7 7 0 0 0 5-17 z" fill="var(--emerald)" opacity="0.28"/>
+        <path d="M19 37 a7 7 0 0 0 5 17 h12 a7 7 0 0 0 5-17 z" fill="none" stroke="var(--emerald)" stroke-width="1.2" opacity="0.55"/>
+      </svg>
+    </div>
+    <h1>The Alchemist's Ledger</h1>
+    <p class="hero-kicker">Gate to Sovngarde Alchemy Companion</p>
+    <p class="hero-desc">Discover the strongest alchemy combinations in Gate to Sovngarde. The Ledger ranks thousands of possible recipes by Potency, so you can see what's worth brewing before you spend the ingredients.</p>
+    <button type="button" class="launch-btn" id="launchBtn">Launch Ledger</button>
+  </div>
+
+  <div class="landing-accordion">
+    <details class="acc-item" open>
+      <summary>What is The Alchemist's Ledger?</summary>
+      <div class="acc-body">The Alchemist's Ledger is a companion database for Gate to Sovngarde. It ranks the strongest 2- and 3-ingredient alchemy recipes by <b>Potency</b>, drawing on thousands of possible combinations, so you can see which are worth brewing before you spend your ingredients on them. It doesn't replace your alchemy table — it tells you what to aim for once you're there, and lets you browse every reagent and its effects along the way.</div>
+    </details>
+    <details class="acc-item">
+      <summary>What is Potency?</summary>
+      <div class="acc-body">
+        <p>Potency is a consistent ranking used to compare recipes.</p>
+        <p>It allows every valid combination to be measured using the same calculation, making it possible to sort recipes from strongest to weakest.</p>
+        <p class="potency-formula">baseCost &times; (magnitude &times; duration &divide; 10)<sup>1.1</sup></p>
+        <p>Potency is <b>not</b> your character's final in-game potion strength.</p>
+        <p class="potency-formula conceptual">Final in-game strength is affected by:<br>Potency &times; Alchemy skill &times; perks &times; Fortify Alchemy gear &times; traits &times; other gameplay modifiers</p>
+        <p class="formula-caption">Conceptual only — not a calculation the Ledger performs.</p>
+        <p>Your actual potions will still be affected by your Alchemy skill, perks, enchantments and any other gameplay modifiers.</p>
+        <p>Think of Potency as a way of comparing recipes fairly rather than predicting your exact crafting results.</p>
+      </div>
+    </details>
+    <details class="acc-item">
+      <summary>Why are some recipes 2 ingredients and some 3?</summary>
+      <div class="acc-body">A potion only gains an effect if at least two of its ingredients share it. Sometimes the strongest version of an effect comes from just two well-matched reagents; other times a third ingredient brings in an additional shared effect and produces something more powerful overall. The Ledger checks both and shows you whichever combination actually ranks higher — so you're never stuck guessing whether a third ingredient would have helped.</div>
+    </details>
+    <details class="acc-item">
+      <summary>GTS vs GTS CE</summary>
+      <div class="acc-body">
+        <p><b>GTS</b> and <b>GTS CE</b> each come from their own export of Gate to Sovngarde's ingredient data — they aren't just different filters on the same list.</p>
+        <p>Gate to Sovngarde: Community Edition changes some existing ingredient effects and recipes, as well as adding new ones. Because the Ledger analyses that exported game data directly, switching between GTS and GTS CE automatically reflects those gameplay differences in the rankings.</p>
+        <p>Creation Club and additional mod-added ingredients can then be included or excluded using the filters inside the Ledger, on top of whichever collection you've chosen.</p>
+      </div>
+    </details>
+  </div>
+</div>
+
+<div id="launchOverlay" aria-hidden="true">
+  <div class="loading-inner">
+    <div class="loading-mark" aria-hidden="true">
+      <svg viewBox="0 0 60 60" fill="none">
+        <path d="M24 8 h12 M26 8 v13 L15 44 a7 7 0 0 0 6 11 h18 a7 7 0 0 0 6-11 L34 21 V8"
+              stroke="var(--gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="M19 37 a7 7 0 0 0 5 17 h12 a7 7 0 0 0 5-17 z" fill="var(--emerald)" opacity="0.28"/>
+        <circle class="bubble" cx="26" cy="46" r="1.6" fill="var(--gold-bright)"/>
+        <circle class="bubble b2" cx="32" cy="48" r="1.2" fill="var(--gold-bright)"/>
+        <circle class="bubble b3" cx="30" cy="44" r="1.9" fill="var(--emerald)"/>
+      </svg>
+    </div>
+    <p class="loading-label">Loading the Ledger</p>
+    <p class="loading-tip" id="loadingTip"></p>
+    <div class="loading-error hidden" id="loadingError">
+      <p id="loadingErrorMsg"></p>
+      <button type="button" class="launch-btn small" id="retryBtn">Try Again</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="app">
 
   <header>
     <div class="mast">
@@ -478,9 +713,16 @@
 
   worker.onmessage=function(ev){
     const m=ev.data;
-    if(m.type==='ready'){ready=true; if(pending){run(pending);pending=null;} return;}
+    if(m.type==='ready'){ready=true; setDataState('ready'); if(pending){run(pending);pending=null;} return;}
     if(m.type==='result'){ if(m.reqId!==lastReqId) return; renderLedger(m); }
   };
+
+  // ---- Data readiness (drives the launch/loading overlay) ----
+  let dataState='loading', dataErrorMsg='';
+  const dataListeners=[];
+  function setDataState(s,msg){dataState=s;dataErrorMsg=msg||'';dataListeners.forEach(function(fn){fn(s,dataErrorMsg);});}
+  function onDataState(fn){dataListeners.push(fn);}
+
   // ---- State ----
   const state={mix:'both',type:'all',excludeRare:false,incCC:true,incMod:true,
                requireIdx:null,view:'potions',search:'',tab:'gts'};
@@ -656,6 +898,7 @@
     $('dataNote').innerHTML=t.note;
     const src=t.src, myseq=++loadSeq;
     ready=false; pending=null;
+    setDataState('loading');
 
     function activate(){
       if(myseq!==loadSeq)return;          // a newer switch superseded this one
@@ -679,8 +922,9 @@
       activate();
     }).catch(function(err){
       if(myseq!==loadSeq)return;
-      $('ledger').innerHTML='<div class="empty">Couldn\'t load '+t.label+' ('+SOURCES[src]+'). '+
-        'This page loads its data files, so it needs to be served over http (GitHub Pages, or a local server) rather than opened from disk.</div>';
+      const msg='Couldn\'t load '+t.label+' ('+SOURCES[src]+'). This page loads its data files, so it needs to be served over http (GitHub Pages, or a local server) rather than opened from disk.';
+      $('ledger').innerHTML='<div class="empty">'+msg+'</div>';
+      setDataState('error',msg);
     });
   }
 
@@ -724,6 +968,90 @@
   });
   // Enter in potions search commits nothing extra; blur clears the box but keeps the chip
   $('search').addEventListener('keydown',function(e){if(e.key==='Enter'&&state.view==='potions'){e.target.blur();}});
+
+  // ---- Launch transition ----
+  const LOADING_TIPS=[
+    'Potency ranks a recipe\'s raw strength — the same for every alchemist, regardless of skill.',
+    'Two ingredients sharing an effect make a potion. A third can bring in an effect entirely their own.',
+    'Farmable only hides unique, quest-locked reagents like Jarrin Root.',
+    'Creation Club and Mod content filters narrow results down to your own load order.',
+    'The strongest recipe isn\'t always the one with the most ingredients.'
+  ];
+  const MIN_LOADING_MS=900;
+  let launchInFlight=false, dataOffFn=null;
+
+  function pickTip(){
+    return LOADING_TIPS[Math.floor(Math.random()*LOADING_TIPS.length)];
+  }
+  function showLoadingTip(){
+    $('loadingError').classList.add('hidden');
+    $('loadingTip').classList.remove('hidden');
+    $('loadingTip').textContent=pickTip();
+  }
+  function showLoadingError(msg){
+    $('loadingTip').classList.add('hidden');
+    $('loadingErrorMsg').textContent=msg||'Something went wrong loading the data.';
+    $('loadingError').classList.remove('hidden');
+  }
+
+  function launchLedger(originEl){
+    if(launchInFlight)return;
+    launchInFlight=true;
+    const overlay=$('launchOverlay');
+    showLoadingTip();
+
+    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const start=performance.now();
+
+    function afterOverlayOpaque(){
+      $('landing').classList.add('hidden');
+      $('app').classList.add('active');
+      proceedOnData();
+    }
+
+    function proceedOnData(){
+      if(dataState==='ready'){
+        const wait=Math.max(0,MIN_LOADING_MS-(performance.now()-start));
+        setTimeout(revealApp,wait);
+      }else if(dataState==='error'){
+        showLoadingError(dataErrorMsg);
+      }else{
+        dataOffFn=function(s,msg){
+          if(s==='ready'){const wait=Math.max(0,MIN_LOADING_MS-(performance.now()-start));setTimeout(revealApp,wait);}
+          else if(s==='error'){showLoadingError(msg);}
+        };
+        onDataState(dataOffFn);
+      }
+    }
+
+    function revealApp(){
+      overlay.classList.remove('active','dim');
+      launchInFlight=false;
+    }
+
+    // 1. subtle button press
+    originEl.classList.add('pressed');
+    setTimeout(function(){originEl.classList.remove('pressed');},160);
+
+    // 2. whole screen gently darkens, then 3. finishes fading to black
+    if(reduced){
+      overlay.classList.add('active');
+      afterOverlayOpaque();
+    }else{
+      setTimeout(function(){overlay.classList.add('dim');},120);
+      setTimeout(function(){
+        overlay.classList.add('active');
+        overlay.addEventListener('transitionend',function onEnd(e){
+          if(e.propertyName!=='opacity')return;
+          overlay.removeEventListener('transitionend',onEnd);
+          afterOverlayOpaque();
+        });
+      },380);
+    }
+  }
+
+  $('launchBtn').addEventListener('click',function(e){launchLedger(e.currentTarget);});
+  $('retryBtn').addEventListener('click',function(){showLoadingTip();loadTab(state.tab);});
 
   // ---- Go ----
   loadTab(state.tab);
